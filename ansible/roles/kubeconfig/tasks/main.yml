@@ -5,26 +5,38 @@
   delegate_to: master
   register: kubeconfig_file
 
-- name: Create .kube directory
+- name: Get Jenkins home directory
+  command: getent passwd jenkins
+  register: jenkins_passwd
+  changed_when: false
+
+- name: Set Jenkins home fact
+  set_fact:
+    jenkins_home: "{{ jenkins_passwd.stdout.split(':')[5] }}"
+
+- name: Create Jenkins .kube directory
   file:
-    path: /home/ubuntu/.kube
+    path: "{{ jenkins_home }}/.kube"
     state: directory
-    owner: ubuntu
-    group: ubuntu
-    mode: '0755'
+    owner: jenkins
+    group: jenkins
+    mode: '0700'
 
 - name: Copy kubeconfig to Jenkins
   copy:
     content: "{{ kubeconfig_file.content | b64decode }}"
-    dest: /home/ubuntu/.kube/config
-    owner: ubuntu
-    group: ubuntu
+    dest: "{{ jenkins_home }}/.kube/config"
+    owner: jenkins
+    group: jenkins
     mode: '0600'
 
-- name: Verify kubectl connectivity
+- name: Verify kubectl connectivity as jenkins
   command: kubectl get nodes
+  become: true
+  become_user: jenkins
   environment:
-    KUBECONFIG: /home/ubuntu/.kube/config
+    HOME: "{{ jenkins_home }}"
+    KUBECONFIG: "{{ jenkins_home }}/.kube/config"
   register: kubectl_result
   changed_when: false
 
