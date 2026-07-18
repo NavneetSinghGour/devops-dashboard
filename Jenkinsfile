@@ -9,7 +9,8 @@ pipeline {
     }
 
     environment {
-        APP_NAME = 'devops-dashboard'
+        APP_NAME = "devops-dashboard"
+        IMAGE_NAME = "devops-dashboard"
     }
 
     stages {
@@ -28,7 +29,7 @@ pipeline {
                     ls -lah
 
                     echo
-                    echo "===== Git Commit ====="
+                    echo "===== Latest Commit ====="
                     git log --oneline -1
                 '''
             }
@@ -64,6 +65,23 @@ pipeline {
                 sh '''
                     echo "===== Kubernetes Cluster ====="
                     kubectl get nodes
+                '''
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                sh '''
+                    echo "===== Building Docker Image ====="
+
+                    docker build \
+                        -t ${IMAGE_NAME}:${BUILD_NUMBER} \
+                        .
+
+                    echo
+                    echo "===== Docker Images ====="
+
+                    docker images | grep ${IMAGE_NAME}
                 '''
             }
         }
