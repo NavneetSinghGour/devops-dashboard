@@ -13,16 +13,7 @@
 # Join worker nodes
 - import_playbook: playbooks/workers.yml
 
-# Configure kubectl
-- import_playbook: playbooks/kubeconfig.yml
-
-# Install Helm
-- import_playbook: playbooks/helm.yml
-
-# Install NGINX Ingress Controller
-- import_playbook: playbooks/ingress-nginx.yml
-
-# Install Jenkins
+# Install Jenkins (creates the jenkins user)
 - import_playbook: playbooks/jenkins.yml
 
 # Install tools on Jenkins server
@@ -31,3 +22,12 @@
 - import_playbook: playbooks/kubectl.yml
 
 - import_playbook: playbooks/trivy.yml
+
+# Configure kubeconfig for Jenkins
+- import_playbook: playbooks/kubeconfig.yml
+
+# Install Helm
+- import_playbook: playbooks/helm.yml
+
+# Install NGINX Ingress Controller
+- import_playbook: playbooks/ingress-nginx.yml

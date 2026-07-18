@@ -1,7 +1,29 @@
 ---
+- name: Download Helm installation script
+  get_url:
+    url: https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3
+    dest: /tmp/get_helm.sh
+    mode: "0755"
+
+- name: Install Helm
+  command: /tmp/get_helm.sh
+  args:
+    creates: /usr/local/bin/helm
+
+- name: Verify Helm installation
+  command: helm version
+  register: helm_version
+  changed_when: false
+
+- name: Show Helm version
+  debug:
+    var: helm_version.stdout
+
 - name: Add NGINX Ingress Helm repository
   become: true
   become_user: jenkins
+  environment:
+    KUBECONFIG: /var/lib/jenkins/.kube/config
   command: >
     helm repo add ingress-nginx
     https://kubernetes.github.io/ingress-nginx
@@ -12,13 +34,19 @@
 - name: Update Helm repositories
   become: true
   become_user: jenkins
+  environment:
+    KUBECONFIG: /var/lib/jenkins/.kube/config
   command: helm repo update
 
 - name: Install NGINX Ingress Controller
   become: true
   become_user: jenkins
+  environment:
+    KUBECONFIG: /var/lib/jenkins/.kube/config
   command: >
     helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx
     --namespace ingress-nginx
     --create-namespace
+    --set controller.service.type=NodePort
     --wait
+    --timeout 10m
