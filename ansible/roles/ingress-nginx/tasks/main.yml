@@ -1,0 +1,44 @@
+---
+- name: Add NGINX Ingress Helm repository
+  become: true
+  become_user: jenkins
+  command: >
+    helm repo add ingress-nginx
+    https://kubernetes.github.io/ingress-nginx
+  register: helm_repo
+  changed_when: "'already exists' not in (helm_repo.stderr | default(''))"
+  failed_when: false
+
+- name: Update Helm repositories
+  become: true
+  become_user: jenkins
+  command: helm repo update
+
+- name: Copy Helm values file to Jenkins server
+  copy:
+    src: values.yaml
+    dest: /tmp/ingress-nginx-values.yaml
+    mode: "0644"
+
+- name: Install NGINX Ingress Controller
+  become: true
+  become_user: jenkins
+  command: >
+    helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx
+    --namespace ingress-nginx
+    --create-namespace
+    -f /tmp/ingress-nginx-values.yaml
+
+- name: Wait for NGINX Ingress Controller rollout
+  become: true
+  become_user: jenkins
+  command: >
+    kubectl rollout status deployment/ingress-nginx-controller
+    -n ingress-nginx
+    --timeout=300s
+  register: rollout_status
+  changed_when: false
+
+- name: Display rollout status
+  debug:
+    var: rollout_status.stdout

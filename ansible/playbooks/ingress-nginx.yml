@@ -1,0 +1,7 @@
+---
+- name: Install NGINX Ingress Controller
+  hosts: jenkins
+  become: true
+
+  roles:
+    - ingress-nginx
