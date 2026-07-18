@@ -10,7 +10,8 @@ pipeline {
 
     environment {
         APP_NAME = "devops-dashboard"
-        IMAGE_NAME = "devops-dashboard"
+        DOCKER_USERNAME = "navneet2004"
+        IMAGE_NAME = "navneet2004/devops-dashboard"
     }
 
     stages {
@@ -75,16 +76,35 @@ pipeline {
                     echo "===== Building Docker Image ====="
 
                     docker build \
-                        -t ${IMAGE_NAME}:${BUILD_NUMBER} \
+                        -t ${APP_NAME}:${BUILD_NUMBER} \
                         .
-
-                    echo
-                    echo "===== Docker Images ====="
-
-                    docker images | grep ${IMAGE_NAME}
                 '''
             }
         }
+
+        stage('Push Docker Image') {
+            steps {
+                withCredentials([usernamePassword(
+                    credentialsId: 'dockerhub-creds',
+                    usernameVariable: 'DOCKER_USER',
+                    passwordVariable: 'DOCKER_PASS'
+                )]) {
+
+                    sh '''
+                        echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+
+                        docker tag \
+                            ${APP_NAME}:${BUILD_NUMBER} \
+                            ${IMAGE_NAME}:${BUILD_NUMBER}
+
+                        docker push ${IMAGE_NAME}:${BUILD_NUMBER}
+
+                        docker logout
+                    '''
+                }
+            }
+        }
+
     }
 
     post {
