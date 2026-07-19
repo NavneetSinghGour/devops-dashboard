@@ -1,0 +1,49 @@
+---
+- name: Copy Grafana values
+  copy:
+    src: grafana-values.yaml
+    dest: /tmp/grafana-values.yaml
+
+- name: Add Grafana Helm repository
+  become: true
+  become_user: jenkins
+  command: helm repo add grafana https://grafana.github.io/helm-charts
+  register: grafana_repo
+  changed_when: "'has been added' in grafana_repo.stdout"
+  failed_when: false
+
+- name: Update Helm repositories
+  become: true
+  become_user: jenkins
+  command: helm repo update
+
+- name: Install Grafana
+  become: true
+  become_user: jenkins
+  command: >
+    helm upgrade --install grafana grafana/grafana
+    --namespace observability
+    --create-namespace
+    -f /tmp/grafana-values.yaml
+
+- name: Verify Grafana Pods
+  become: true
+  become_user: jenkins
+  command: kubectl get pods -n observability
+  register: grafana_pods
+  changed_when: false
+
+- name: Show Grafana Pods
+  debug:
+    var: grafana_pods.stdout_lines
+
+- name: Verify Grafana Service
+  become: true
+  become_user: jenkins
+  command: kubectl get svc -n observability
+  register: grafana_service
+  changed_when: false
+
+- name: Show Grafana Service
+  debug:
+    var: grafana_service.stdout_lines

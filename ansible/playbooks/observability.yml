@@ -8,3 +8,4 @@
     - jaeger
     - prometheus
     - servicemonitor
+    - grafana
