@@ -1,0 +1,18 @@
+---
+- name: Copy Fluent Bit manifests
+  copy:
+    src: "{{ item }}"
+    dest: "/tmp/{{ item }}"
+    mode: "0644"
+  loop:
+    - fluent-bit-rbac.yaml
+    - fluent-bit-config.yaml
+    - fluent-bit-daemonset.yaml
+
+- name: Deploy Fluent Bit
+  become: true
+  become_user: jenkins
+  shell: |
+    kubectl apply -f /tmp/fluent-bit-rbac.yaml
+    kubectl apply -f /tmp/fluent-bit-config.yaml
+    kubectl apply -f /tmp/fluent-bit-daemonset.yaml

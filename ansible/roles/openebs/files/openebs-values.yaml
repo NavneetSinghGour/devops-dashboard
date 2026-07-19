@@ -1,0 +1,12 @@
+localprovisioner:
+  enabled: true
+
+engines:
+  local:
+    enabled: true
+
+ndm:
+  enabled: false
+
+analytics:
+  enabled: false

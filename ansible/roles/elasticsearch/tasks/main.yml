@@ -1,0 +1,27 @@
+---
+- name: Add Elastic Helm repository
+  become: true
+  become_user: jenkins
+  shell: |
+    helm repo add elastic https://helm.elastic.co
+    helm repo update
+
+- name: Create logging namespace
+  become: true
+  become_user: jenkins
+  shell: |
+    kubectl create namespace logging --dry-run=client --validate=false -o yaml | kubectl apply -f -
+
+- name: Copy Elasticsearch values file
+  copy:
+    src: elasticsearch-values.yaml
+    dest: /tmp/elasticsearch-values.yaml
+    mode: "0644"
+
+- name: Install Elasticsearch
+  become: true
+  become_user: jenkins
+  shell: |
+    helm upgrade --install elasticsearch elastic/elasticsearch \
+      --namespace logging \
+      -f /tmp/elasticsearch-values.yaml

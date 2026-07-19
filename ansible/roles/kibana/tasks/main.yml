@@ -1,0 +1,22 @@
+---
+- name: Copy Kibana deployment
+  copy:
+    src: kibana-deployment.yaml
+    dest: /tmp/kibana-deployment.yaml
+    mode: "0644"
+
+- name: Copy Kibana service
+  copy:
+    src: kibana-service.yaml
+    dest: /tmp/kibana-service.yaml
+    mode: "0644"
+
+- name: Deploy Kibana Deployment
+  become: true
+  become_user: jenkins
+  command: kubectl apply -f /tmp/kibana-deployment.yaml
+
+- name: Deploy Kibana Service
+  become: true
+  become_user: jenkins
+  command: kubectl apply -f /tmp/kibana-service.yaml

@@ -1,0 +1,36 @@
+replicas: 1
+
+minimumMasterNodes: 1
+
+clusterHealthCheckParams: "wait_for_status=yellow&timeout=1s"
+
+esJavaOpts: "-Xms512m -Xmx512m"
+
+protocol: http
+
+createCert: false
+
+esConfig:
+  elasticsearch.yml: |
+    xpack.security.enabled: false
+    xpack.security.http.ssl.enabled: false
+    xpack.security.transport.ssl.enabled: false
+
+resources:
+  requests:
+    cpu: 200m
+    memory: 1Gi
+  limits:
+    cpu: 1000m
+    memory: 2Gi
+
+volumeClaimTemplate:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: openebs-hostpath
+  resources:
+    requests:
+      storage: 10Gi
+
+service:
+  type: ClusterIP

@@ -31,3 +31,6 @@
 
 # Install NGINX Ingress Controller
 - import_playbook: playbooks/ingress-nginx.yml
+
+# Deploy Observability Stack
+- import_playbook: playbooks/observability.yml

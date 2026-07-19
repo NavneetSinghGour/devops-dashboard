@@ -1,0 +1,14 @@
+elasticsearchHosts: "http://elasticsearch-master:9200"
+
+replicas: 1
+
+service:
+  type: ClusterIP
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 1Gi

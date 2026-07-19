@@ -1,0 +1,27 @@
+---
+- name: Add OpenEBS Helm repository
+  become: true
+  become_user: jenkins
+  shell: |
+    helm repo add openebs https://openebs.github.io/openebs
+    helm repo update
+
+- name: Create openebs namespace
+  become: true
+  become_user: jenkins
+  shell: |
+    kubectl create namespace openebs --dry-run=client --validate=false -o yaml | kubectl apply -f -
+
+- name: Copy OpenEBS values file
+  copy:
+    src: openebs-values.yaml
+    dest: /tmp/openebs-values.yaml
+    mode: '0644'
+
+- name: Install OpenEBS
+  become: true
+  become_user: jenkins
+  shell: |
+    helm upgrade --install openebs openebs/openebs \
+      --namespace openebs \
+      -f /tmp/openebs-values.yaml
