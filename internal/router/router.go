@@ -5,11 +5,11 @@ import (
 
 	"github.com/NavneetSinghGour/devops-dashboard/internal/handlers"
 	"github.com/NavneetSinghGour/devops-dashboard/internal/middleware"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func RegisterRoutes() {
 
-	// Create a new router
 	mux := http.NewServeMux()
 
 	// Static Files
@@ -19,10 +19,13 @@ func RegisterRoutes() {
 	// Dashboard
 	mux.HandleFunc("/", handlers.Dashboard)
 
-	// Health
+	// Health Endpoints
 	mux.HandleFunc("/health", handlers.Health)
 	mux.HandleFunc("/ready", handlers.Health)
 	mux.HandleFunc("/live", handlers.Health)
+
+	// Prometheus Metrics
+	mux.Handle("/metrics", promhttp.Handler())
 
 	// APIs
 	mux.HandleFunc("/api/info", handlers.ApplicationInfo)
@@ -30,6 +33,6 @@ func RegisterRoutes() {
 	mux.HandleFunc("/api/runtime", handlers.RuntimeInfo)
 	mux.HandleFunc("/api/kubernetes", handlers.KubernetesInfo)
 
-	// Apply Logging Middleware
+	// Middleware
 	http.Handle("/", middleware.Logging(mux))
 }
